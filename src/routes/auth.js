@@ -36,12 +36,15 @@ authRouter.post('/signup', async (req, res) => {
     const token = await savedUser.getJWT();
 
     
-    res.cookie("token", token, {
-      expires: new Date(Date.now() + 8 * 3600000), 
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: process.env.NODE_ENV === "production",
-    });
+    
+      res.cookie("token", token, {
+  expires: new Date(Date.now() + 24 * 3600000), // 24 hours expiry
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  secure: process.env.NODE_ENV === "production", 
+  path: "/"
+  });
+    
 
     res.status(201).json({
       message: "User saved successfully",
@@ -74,11 +77,12 @@ authRouter.post("/login", async (req, res) => {
     const token = await user.getJWT();
 
     res.cookie("token", token, {
-      expires: new Date(Date.now() + 8 * 3600000),
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: process.env.NODE_ENV === "production",
-    });
+  expires: new Date(Date.now() + 24 * 3600000), 
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  secure: process.env.NODE_ENV === "production", 
+  path: "/"
+});
 
     res.status(200).json({
       message: "Login successful",
