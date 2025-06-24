@@ -17,7 +17,7 @@ const corsOptions = {
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000"
       : 
-         "https://pen-pot-frontend.vercel.app"
+         "https://marsheepartnersatish.vercel.app"
         ,
   credentials: true,
 };
