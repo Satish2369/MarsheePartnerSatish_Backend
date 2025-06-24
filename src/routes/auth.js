@@ -38,7 +38,7 @@ authRouter.post('/signup', async (req, res) => {
     
     
       res.cookie("token", token, {
-  expires: new Date(Date.now() + 24 * 3600000), // 24 hours expiry
+  expires: new Date(Date.now() + 24 * 3600000), 
   httpOnly: true,
   sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
   secure: process.env.NODE_ENV === "production", 

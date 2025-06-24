@@ -30,8 +30,10 @@ app.use(cookieParser());
 
 
 const authRouter = require("./routes/auth");
-app.use("/", authRouter);
+const adminRouter = require("./routes/adminAuth")
 
+app.use("/", authRouter);
+app.use("/",adminRouter)
 
 
 connectDB()
