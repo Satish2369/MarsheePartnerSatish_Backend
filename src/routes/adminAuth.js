@@ -83,10 +83,16 @@ adminRouter.post("/admin/login", async (req, res)=>{
 
 
 
-adminRouter.get("/admin/accounts",adminAuth, async (req, res) => {
+adminRouter.post("/admin/account",adminAuth, async (req, res) => {
+
   try {
-    const users = await User.find({ role: "user" })
-      .select("name email role createdAt");
+    const {query} = req.body;
+    const users = await User.find({
+      $or: [
+        { email: { $regex: query, $options: "i" } },
+        { name: { $regex: query, $options: "i" } }
+      ]
+    }).select("name email role createdAt");
 
     res.status(200).json({
       success: true,
