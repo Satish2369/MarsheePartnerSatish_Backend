@@ -39,6 +39,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["Active", "Inactive", "Suspended"],
     default: "Active"
+  },
+  isadminCreated:{
+     type:String,
+     enum:["true","false"],
+     default:"false"
   }
 
 }, { timestamps: true });

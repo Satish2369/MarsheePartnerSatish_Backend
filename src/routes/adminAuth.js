@@ -88,12 +88,18 @@ adminRouter.post("/admin/account",adminAuth, async (req, res) => {
 
   try {
     const {query} = req.body;
-    const users = await User.find({
+    
+      const users = await User.find({
+      $and: [
+    {
       $or: [
         { email: { $regex: query, $options: "i" } },
-        { name: { $regex: query, $options: "i" } }
+        { name: { $regex: query, $options: "i" } },
       ]
-    }).select("name email role createdAt");
+    },
+    { role: { $ne: "admin" } }
+  ]
+}).select("name email role createdAt");
 
     res.status(200).json({
       success: true,
@@ -123,7 +129,7 @@ adminRouter.post("/admin/logout",async(req,res)=>{
 
 
 
-// Add these new routes for admin partner management
+
 
 // Get partner details by ID
 adminRouter.get("/admin/partner/:id", adminAuth, async (req, res) => {
