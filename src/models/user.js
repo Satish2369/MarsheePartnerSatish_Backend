@@ -6,15 +6,15 @@ const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required:true,
+    required: true,
     minlength: 3,
     maxlength: 45,
   },
 
   email: {
     type: String,
-    unique:true,
-    required:true,
+    unique: true,
+    required: true,
     lowercase: true,
     trim: true,
     validate: {
@@ -25,16 +25,21 @@ const userSchema = new mongoose.Schema({
 
   password: {
     type: String,
-    required:true,
+    required: true,
     minlength: 6,
   },
 
-  role:{
-    type:String,
-    enum:["user","admin"],
-    default:"user"
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user"
+  },
+  
+  status: {
+    type: String,
+    enum: ["Active", "Inactive", "Suspended"],
+    default: "Active"
   }
-
 
 }, { timestamps: true });
 

@@ -69,6 +69,13 @@ authRouter.post("/login", async (req, res) => {
   
     if (!user) throw new Error("Invalid credentials");
 
+    // Check if user is an admin - don't allow admins to login through regular user login
+    if (user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Please use admin login page",
+      });
+    }
 
     const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) throw new Error("Invalid credentials");
@@ -77,12 +84,12 @@ authRouter.post("/login", async (req, res) => {
     const token = await user.getJWT();
 
     res.cookie("token", token, {
-  expires: new Date(Date.now() + 24 * 3600000), 
-  httpOnly: true,
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  secure: process.env.NODE_ENV === "production", 
-  path: "/"
-});
+      expires: new Date(Date.now() + 24 * 3600000), 
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      secure: process.env.NODE_ENV === "production", 
+      path: "/"
+    });
 
     res.status(200).json({
       message: "Login successful",
