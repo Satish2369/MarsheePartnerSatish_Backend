@@ -31,8 +31,8 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ["user", "admin"],
-    default: "user"
+    enum: ["partner", "admin","manager"],
+    default: "partner"
   },
   
   status: {
@@ -59,7 +59,7 @@ userSchema.pre("save", async function (next) {
 // 🔑 Generate JWT
 userSchema.methods.getJWT = function () {
   return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
+    expiresIn: "5d",
   });
 };
 
