@@ -35,7 +35,8 @@ const userSchema = new mongoose.Schema({
 
   firebaseUid: {
     type: String,
-    sparse: true, // For users authenticated through Firebase
+    sparse: true,
+    unique: true, 
   },
 
   password: {

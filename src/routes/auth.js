@@ -219,36 +219,34 @@ authRouter.post('/signup/phone', async (req, res) => {
       });
     }
 
+    // Declare user here
+    let user;
+
     // Check if user already exists with this phone number
-    let existingUser = await User.findOne({ phoneNumber });
-    
+    const existingUser = await User.findOne({ phoneNumber });
+
     if (existingUser) {
       return res.status(409).json({
         success: false,
         message: "User with this phone number already exists"
       });
-    }
-    else {
+    } else {
       // Create new user
-    const user = new User({
+      user = new User({
         name,
         phoneNumber,
         firebaseUid,
-       
       });
-      
       await user.save();
     }
 
-    
     const token = await user.getJWT();
 
-
     res.cookie("token", token, {
-      expires: new Date(Date.now() + 24 * 3600000), 
+      expires: new Date(Date.now() + 24 * 3600000),
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      secure: process.env.NODE_ENV === "production", 
+      secure: process.env.NODE_ENV === "production",
       path: "/"
     });
 
@@ -268,5 +266,6 @@ authRouter.post('/signup/phone', async (req, res) => {
     });
   }
 });
+
 
 module.exports = authRouter;
