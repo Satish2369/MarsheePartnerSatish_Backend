@@ -253,7 +253,7 @@ adminRouter.get("/admin/partner/:id", adminAuth, async (req, res) => {
   }
 });
 
-adminRouter.put("/admin/partner/:id", adminAuth, async (req, res) => {
+adminRouter.patch("/admin/partner/:id", adminAuth, async (req, res) => {
   try {
     const partnerId = req.params.id;
 
@@ -273,29 +273,26 @@ adminRouter.put("/admin/partner/:id", adminAuth, async (req, res) => {
       });
     }
 
-    const { name, email, status } = req.body;
+    // Get update fields from request body
+    const updateFields = req.body;
+    
+    // Find and update the partner
+    const updatedPartner = await User.findByIdAndUpdate(
+      partnerId,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
 
-    // Find the partner
-    const partner = await User.findById(partnerId);
-
-    if (!partner) {
+    if (!updatedPartner) {
       return res.status(404).json({
         success: false,
         message: "Partner not found",
       });
     }
 
-    // Update fields
-    if (name) partner.name = name;
-    if (email) partner.email = email;
-    if (status) partner.status = status;
-
-    // Save the updated partner
-    await partner.save();
-
     res.status(200).json({
       success: true,
-      data: partner,
+      data: updatedPartner,
       message: "Partner updated successfully",
     });
   } catch (err) {

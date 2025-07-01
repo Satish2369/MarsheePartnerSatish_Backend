@@ -3,12 +3,12 @@ const validator = require("validator");
 const User = require("../models/user");
 const { validateSignUpData } = require("../utils/validation");
 const { userAuth } = require("../middlewares/auth");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authRouter = express.Router();
 
 
-authRouter.post('/signup', async (req, res) => {
+authRouter.post('/signup/email', async (req, res) => {
   try {
     // Validate the incoming data
     validateSignUpData(req);
@@ -204,6 +204,67 @@ authRouter.get("/profile", userAuth, async (req, res) => {
     res.status(500).json({
       message: "Failed to fetch profile",
       error: error.message,
+    });
+  }
+});
+
+authRouter.post('/signup/phone', async (req, res) => {
+  try {
+    const { name, phoneNumber, firebaseUid } = req.body;
+
+    if (!name || !phoneNumber || !firebaseUid) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, phone number, and Firebase UID are required",
+      });
+    }
+
+    // Check if user already exists with this phone number
+    let existingUser = await User.findOne({ phoneNumber });
+    
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User with this phone number already exists"
+      });
+    }
+    else {
+      // Create new user
+    const user = new User({
+        name,
+        phoneNumber,
+        firebaseUid,
+       
+      });
+      
+      await user.save();
+    }
+
+    
+    const token = await user.getJWT();
+
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 24 * 3600000), 
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      secure: process.env.NODE_ENV === "production", 
+      path: "/"
+    });
+
+    res.status(201).json({
+      message: "User registered successfully",
+      data: {
+        name: user.name,
+        phoneNumber: user.phoneNumber
+      },
+    });
+
+  } catch (err) {
+    console.error("Phone signup error:", err);
+    res.status(400).json({
+      success: false,
+      message: "Error: " + err.message
     });
   }
 });

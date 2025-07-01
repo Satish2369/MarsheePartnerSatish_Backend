@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
-    required: true,
+    sparse: true, // Allow null/undefined for users who sign up with phone only
     lowercase: true,
     trim: true,
     validate: {
@@ -23,15 +23,33 @@ const userSchema = new mongoose.Schema({
     },
   },
 
+  phoneNumber: {
+    type: String,
+    unique: true,
+    sparse: true, // Allow null/undefined for users who sign up with email only
+    validate: {
+      validator: (val) => !val || /^\+[1-9]\d{1,14}$/.test(val), // E.164 format validation
+      message: "Invalid phone number format. Use E.164 format (e.g., +1234567890)"
+    }
+  },
+
+  firebaseUid: {
+    type: String,
+    sparse: true, // For users authenticated through Firebase
+  },
+
   password: {
     type: String,
-    required: true,
+    required: function() {
+      // Password only required if not using Firebase auth (no firebaseUid and no phoneNumber)
+      return !this.firebaseUid && !this.phoneNumber;
+    },
     minlength: 6,
   },
 
   role: {
     type: String,
-    enum: ["partner", "admin","manager"],
+    enum: ["partner", "owner", "manager", "admin"],
     default: "partner"
   },
   
@@ -42,13 +60,12 @@ const userSchema = new mongoose.Schema({
   },
   isadminCreated:{
      type:String,
-     enum:["true","false"],
+     enum:["true", "false"],
      default:"false"
   }
 
 }, { timestamps: true });
 
-// 🔐 Hash password before save
 userSchema.pre("save", async function (next) {
   if (this.isModified("password") && this.password) {
     this.password = await bcrypt.hash(this.password, 10);
@@ -56,15 +73,18 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// 🔑 Generate JWT
+
 userSchema.methods.getJWT = function () {
   return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
     expiresIn: "5d",
   });
 };
 
-// 🔐 Validate password
+
 userSchema.methods.validatePassword = async function (passwordByUser) {
+
+  if (!this.password) return false;
+  
   return await bcrypt.compare(passwordByUser, this.password);
 };
 
