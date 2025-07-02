@@ -58,7 +58,7 @@ authRouter.post('/signup/email', async (req, res) => {
 });
 
 
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login/email", async (req, res) => {
   try {
     const { password, email } = req.body;
 
@@ -104,6 +104,54 @@ authRouter.post("/login", async (req, res) => {
     res.status(400).send("ERROR: " + err.message);
   }
 });
+
+authRouter.post("/login/phone", async (req, res) => {
+
+   try{
+
+
+ const{phoneNumber,firebaseUid} = req.body;
+
+ const user = await User.findOne({phoneNumber,firebaseUid});
+ if(!user){
+  return res.status(400).json({
+    success: false,
+    message: "User not found"
+   })
+ }
+
+
+  const token = await user.getJWT();
+  res.cookie("token", token, {
+    expires: new Date(Date.now() + 24 * 3600000),
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/"
+  });
+  res.status(200).json({
+    message: "Login successful",
+    data: {
+      name: user.name,
+      phoneNumber: user.phoneNumber,
+    },
+  });
+
+   }
+   catch(err){
+   res.status(500).json({
+    "success": false,
+    "message": err.message ||"Server error"
+   })
+   }
+
+})
+
+
+
+
+
+
 
 authRouter.post("/setup-partner", async (req, res) => {
   try {
@@ -219,10 +267,10 @@ authRouter.post('/signup/phone', async (req, res) => {
       });
     }
 
-    // Declare user here
+  
     let user;
 
-    // Check if user already exists with this phone number
+  
     const existingUser = await User.findOne({ phoneNumber });
 
     if (existingUser) {
@@ -231,7 +279,7 @@ authRouter.post('/signup/phone', async (req, res) => {
         message: "User with this phone number already exists"
       });
     } else {
-      // Create new user
+      
       user = new User({
         name,
         phoneNumber,

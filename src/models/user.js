@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
-    sparse: true, // Allow null/undefined for users who sign up with phone only
+    sparse: true, 
     lowercase: true,
     trim: true,
     validate: {
@@ -26,9 +26,9 @@ const userSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     unique: true,
-    sparse: true, // Allow null/undefined for users who sign up with email only
+    sparse: true, 
     validate: {
-      validator: (val) => !val || /^\+[1-9]\d{1,14}$/.test(val), // E.164 format validation
+      validator: (val) => !val || /^\+[1-9]\d{1,14}$/.test(val), 
       message: "Invalid phone number format. Use E.164 format (e.g., +1234567890)"
     }
   },
