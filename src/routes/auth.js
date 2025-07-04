@@ -29,27 +29,18 @@ authRouter.post('/signup/email', async (req, res) => {
     const user = new User({
       name,
       email,
-      password,
+      password
     
     });
 
     const savedUser = await user.save();
-    const token = await savedUser.getJWT();
-
-    
-    
-      res.cookie("token", token, {
-  expires: new Date(Date.now() + 24 * 3600000), 
-  httpOnly: true,
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  secure: process.env.NODE_ENV === "production", 
-  path: "/"
-  });
+ 
     
 
     res.status(201).json({
       message: "User saved successfully",
-      data: savedUser,
+     
+
     });
 
   } catch (err) {
@@ -112,6 +103,13 @@ authRouter.post("/login/phone", async (req, res) => {
 
  const{phoneNumber,firebaseUid} = req.body;
 
+     if(!phoneNumber || !firebaseUid){
+      return res.status(400).json({
+        success: false,
+        message: "Phone number and Firebase UID are required"
+      })
+     }
+
  const user = await User.findOne({phoneNumber,firebaseUid});
  if(!user){
   return res.status(400).json({
@@ -134,6 +132,7 @@ authRouter.post("/login/phone", async (req, res) => {
     data: {
       name: user.name,
       phoneNumber: user.phoneNumber,
+      email: user.email || null,
     },
   });
 
@@ -146,11 +145,6 @@ authRouter.post("/login/phone", async (req, res) => {
    }
 
 })
-
-
-
-
-
 
 
 authRouter.post("/setup-partner", async (req, res) => {
@@ -288,22 +282,10 @@ authRouter.post('/signup/phone', async (req, res) => {
       await user.save();
     }
 
-    const token = await user.getJWT();
-
-    res.cookie("token", token, {
-      expires: new Date(Date.now() + 24 * 3600000),
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/"
-    });
+  
 
     res.status(201).json({
       message: "User registered successfully",
-      data: {
-        name: user.name,
-        phoneNumber: user.phoneNumber
-      },
     });
 
   } catch (err) {

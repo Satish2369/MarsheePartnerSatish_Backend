@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
     sparse: true, 
     validate: {
       validator: (val) => !val || /^\+[1-9]\d{1,14}$/.test(val), 
-      message: "Invalid phone number format. Use E.164 format (e.g., +1234567890)"
+      message: "Invalid phone number format."
     }
   },
 
@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function() {
-      // Password only required if not using Firebase auth (no firebaseUid and no phoneNumber)
+     
       return !this.firebaseUid && !this.phoneNumber;
     },
     minlength: 6,
